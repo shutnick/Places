@@ -11,19 +11,26 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.example.moreno.places.R;
 import com.example.moreno.places.components.details.PlaceDetailsActivity;
+import com.example.moreno.places.components.root.list.PlaceDataHolder;
+import com.example.moreno.places.components.root.list.PlacesListAdapter;
+import com.example.moreno.places.components.root.list.PlacesListView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+
+import java.util.List;
 
 /**
  * Created on 09.10.2015.
  */
-public class RootActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class RootActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, RootFragment.OnDataReceivedListener {
 
     public static final String LOG_TAG = "RootActivity";
     private RootFragment mFragment;
+    private PlacesListAdapter mPlacesListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,10 +40,14 @@ public class RootActivity extends AppCompatActivity implements GoogleApiClient.C
         mFragment = (RootFragment) supportFragmentManager.findFragmentByTag(RootFragment.TAG);
         if (mFragment == null) {
             mFragment = new RootFragment();
+            FragmentTransaction transaction = supportFragmentManager.beginTransaction();
+            transaction.add(mFragment, RootFragment.TAG);
+            transaction.commit();
         }
-        FragmentTransaction transaction = supportFragmentManager.beginTransaction();
-        transaction.add(mFragment, RootFragment.TAG);
-        transaction.commit();
+        PlacesListView placesListView = (PlacesListView) findViewById(R.id.places_list);
+        placesListView.setLayoutManager(this);
+        mPlacesListAdapter = new PlacesListAdapter();
+        placesListView.setAdapter(mPlacesListAdapter);
     }
 
     private void openPlaceDetails() {
@@ -53,6 +64,7 @@ public class RootActivity extends AppCompatActivity implements GoogleApiClient.C
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setIconifiedByDefault(false);
         searchView.setSubmitButtonEnabled(true);
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -90,4 +102,11 @@ public class RootActivity extends AppCompatActivity implements GoogleApiClient.C
             mFragment.getRequestedLocations(query);
         }
     }
+
+    @Override
+    public void onDataReceived(List<PlaceDataHolder> places) {
+        mPlacesListAdapter.setPlacesList(places);
+        findViewById(R.id.search_tip_text).setVisibility(View.GONE);
+    }
+
 }

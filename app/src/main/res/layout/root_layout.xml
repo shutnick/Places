@@ -8,17 +8,16 @@
     <include
         layout="@layout/search_panel"/>
 
-    <com.example.moreno.places.components.root.list.PlacesListView
-        android:id="@+id/places_list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"/>
-
     <TextView
         android:id="@+id/search_tip_text"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         android:textSize="20sp"
-        android:text="Search by your current location or by keywords"/>
+        android:text="Search by your current location or \n by keywords"/>
+
+    <com.example.moreno.places.components.root.list.PlacesListView
+        android:id="@+id/places_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 </LinearLayout>
