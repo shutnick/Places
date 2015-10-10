@@ -5,15 +5,32 @@
     <uses-sdk
         android:minSdkVersion="4"
         android:targetSdkVersion="23"
-        tools:overrideLibrary="android.support.v7.appcompat"/>
+        tools:overrideLibrary=
+            "android.support.v7.appcompat,
+            android.support.v7.recyclerview"/>
 
     <application
         android:allowBackup="true"
         android:label="@string/app_name"
         android:icon="@drawable/app_icon"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
 
+        <activity
+            android:name=".components.root.RootActivity"
+            android:icon="@drawable/app_icon">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".components.details.PlaceDetailsActivity"
+            android:parentActivityName=".components.root.RootActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".components.root.RootActivity" />
+        </activity>
     </application>
-
 </manifest>

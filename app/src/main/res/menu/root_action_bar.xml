@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/current_location_places"
+        android:icon="@drawable/ic_room_white_24dp"
+        android:title="Current location"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/search_place"
+        android:icon="@drawable/ic_search_white_24dp"
+        android:title="search_places"
+        app:showAsAction="ifRoom"/>
+</menu>
