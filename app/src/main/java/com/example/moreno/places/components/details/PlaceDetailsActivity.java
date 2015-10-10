@@ -1,9 +1,9 @@
 package com.example.moreno.places.components.details;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 
@@ -18,7 +18,7 @@ public class PlaceDetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.root_layout);
-        FragmentManager supportFragmentManager = getSupportFragmentManager();
+        FragmentManager supportFragmentManager = getFragmentManager();
         Fragment rootFragment = supportFragmentManager.findFragmentByTag(PlaceDetailsFragment.TAG);
         if (rootFragment == null) {
             rootFragment = new PlaceDetailsFragment();
@@ -28,8 +28,6 @@ public class PlaceDetailsActivity extends AppCompatActivity {
         transaction.commit();
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle("Ciklum");
-        actionBar.setIcon(R.drawable.app_icon);
     }
 
 }

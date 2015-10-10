@@ -1,7 +1,7 @@
 package com.example.moreno.places.components.details;
 
+import android.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 
 /**
  * Created on 09.10.2015.

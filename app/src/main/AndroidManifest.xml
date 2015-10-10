@@ -1,13 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.moreno.places"
-    xmlns:tools="http://schemas.android.com/tools">
-
-    <uses-sdk
-        android:minSdkVersion="4"
-        android:targetSdkVersion="23"
-        tools:overrideLibrary=
-            "android.support.v7.appcompat,
-            android.support.v7.recyclerview"/>
+    package="com.example.moreno.places">
 
     <application
         android:allowBackup="true"
@@ -15,6 +7,10 @@
         android:icon="@drawable/app_icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBgiri7jGEAiEb7FHoRabseEqdp3Cp0xrY"/>
 
         <activity
             android:name=".components.root.RootActivity"

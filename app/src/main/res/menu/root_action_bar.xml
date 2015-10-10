@@ -13,5 +13,6 @@
         android:id="@+id/search_place"
         android:icon="@drawable/ic_search_white_24dp"
         android:title="search_places"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionViewClass="android.support.v7.widget.SearchView"/>
 </menu>
