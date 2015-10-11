@@ -8,17 +8,15 @@ import android.view.ViewGroup;
 
 import com.example.moreno.places.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created on 11.10.2015.
  */
 public class PhotosListAdapter extends RecyclerView.Adapter<ImageViewHolder> {
-    private List<Bitmap> mPhotos;
+    private List<Bitmap> mPhotos = new ArrayList<>();
 
-    public PhotosListAdapter(List<Bitmap> photos) {
-        mPhotos = photos;
-    }
 
     @Override
     public ImageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -34,5 +32,15 @@ public class PhotosListAdapter extends RecyclerView.Adapter<ImageViewHolder> {
     @Override
     public int getItemCount() {
         return mPhotos.size();
+    }
+
+    public void addPhoto(Bitmap photo) {
+        mPhotos.add(photo);
+        notifyDataSetChanged();
+    }
+
+    public void addPhotos(List<Bitmap> photos) {
+        mPhotos.addAll(photos);
+        notifyDataSetChanged();
     }
 }

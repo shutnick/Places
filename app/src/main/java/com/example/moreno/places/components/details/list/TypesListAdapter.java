@@ -8,17 +8,14 @@ import android.view.ViewGroup;
 import com.example.moreno.places.R;
 import com.example.moreno.places.util.PlaceTypeIconPicker;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created on 11.10.2015.
  */
 public class TypesListAdapter extends RecyclerView.Adapter<ImageViewHolder> {
-    private List<Integer> mPlaceTypes;
-
-    public TypesListAdapter(List<Integer> placeTypes) {
-        mPlaceTypes = placeTypes;
-    }
+    private List<Integer> mPlaceTypes = new ArrayList<>();
 
     @Override
     public ImageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -34,5 +31,10 @@ public class TypesListAdapter extends RecyclerView.Adapter<ImageViewHolder> {
     @Override
     public int getItemCount() {
         return mPlaceTypes.size();
+    }
+
+    public void addTypes(List<Integer> types) {
+        mPlaceTypes.addAll(types);
+        notifyDataSetChanged();
     }
 }

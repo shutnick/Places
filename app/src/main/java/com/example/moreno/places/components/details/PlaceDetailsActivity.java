@@ -43,20 +43,22 @@ public class PlaceDetailsActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.details_layout);
         prepareFragment();
-        saveItems();
+        init();
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
-    private void saveItems() {
+    private void init() {
         mNameView = (TextView) findViewById(R.id.place_details_name);
         mTypesListView = (ImagesListView) findViewById(R.id.place_details_types);
+        mTypesListView.setAdapter(new TypesListAdapter());
         mRatingView = (RatingBar) findViewById(R.id.place_details_rating);
         mAddressView = (TextView) findViewById(R.id.place_details_address);
         mPhoneView = (TextView) findViewById(R.id.place_details_phone_number);
         mWebSiteView = (TextView) findViewById(R.id.place_details_website);
         mPriceView = (TextView) findViewById(R.id.place_details_price);
         mPhotosListView = (ImagesListView) findViewById(R.id.place_details_photos);
+        mPhotosListView.setAdapter(new PhotosListAdapter());
     }
 
     private void prepareFragment() {
@@ -72,6 +74,7 @@ public class PlaceDetailsActivity extends AppCompatActivity
 
     @Override
     public void onConnected(Bundle bundle) {
+        Log.d(LOG_TAG, "Api client connected");
         mFragment.getPlaceDetails();
     }
 
@@ -87,8 +90,9 @@ public class PlaceDetailsActivity extends AppCompatActivity
 
     @Override
     public void onPlaceReceived(PlaceDetailsHolder data) {
+        TypesListAdapter adapter = (TypesListAdapter) mTypesListView.getAdapter();
+        adapter.addTypes(data.types);
         mNameView.setText(data.name);
-        mTypesListView.setAdapter(new TypesListAdapter(data.types));
         mRatingView.setRating(data.rating);
         mAddressView.setText(data.address);
         mPhoneView.setText(data.phone);
@@ -97,7 +101,14 @@ public class PlaceDetailsActivity extends AppCompatActivity
     }
 
     @Override
-    public void onPhotosReceived(List<Bitmap> photos) {
-        mPhotosListView.setAdapter(new PhotosListAdapter(photos));
+    public void onPhotoLoaded(Bitmap photo) {
+        final PhotosListAdapter adapter = (PhotosListAdapter) mPhotosListView.getAdapter();
+        adapter.addPhoto(photo);
+    }
+
+    @Override
+    public void onAllPhotosLoaded(List<Bitmap> photos) {
+        final PhotosListAdapter adapter = (PhotosListAdapter) mPhotosListView.getAdapter();
+        adapter.addPhotos(photos);
     }
 }
