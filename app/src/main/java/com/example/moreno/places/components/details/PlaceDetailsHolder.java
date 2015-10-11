@@ -22,7 +22,7 @@ public class PlaceDetailsHolder {
         types = new LinkedList<>(place.getPlaceTypes());
         rating = place.getRating();
         address = place.getAddress();
-        phone = place.getPhoneNumber();
+        phone = place.getPhoneNumber() == null ? "Undefined" : place.getPhoneNumber();
         website = place.getWebsiteUri() == null ? "Undefined" : place.getWebsiteUri().toString();
         priceLevel = place.getPriceLevel();
     }

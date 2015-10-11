@@ -138,7 +138,6 @@ public class RootFragment extends Fragment {
                 .address(place.getAddress())
                 .distance(mUserLocation.distanceTo(placeLocation));
 
-        Log.d(LOG_TAG, placeTypes.toString());
         mPlacesList.add(builder.build());
     }
 

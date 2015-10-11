@@ -35,7 +35,7 @@ public class PlaceDetailsActivity extends AppCompatActivity
     private TextView mAddressView;
     private TextView mPhoneView;
     private TextView mWebSiteView;
-    private TextView mPriceView;
+    private PriceLevelTextView mPriceView;
     private ImagesListView mPhotosListView;
 
     @Override
@@ -56,7 +56,7 @@ public class PlaceDetailsActivity extends AppCompatActivity
         mAddressView = (TextView) findViewById(R.id.place_details_address);
         mPhoneView = (TextView) findViewById(R.id.place_details_phone_number);
         mWebSiteView = (TextView) findViewById(R.id.place_details_website);
-        mPriceView = (TextView) findViewById(R.id.place_details_price);
+        mPriceView = (PriceLevelTextView) findViewById(R.id.place_details_price);
         mPhotosListView = (ImagesListView) findViewById(R.id.place_details_photos);
         mPhotosListView.setAdapter(new PhotosListAdapter());
     }
@@ -95,9 +95,9 @@ public class PlaceDetailsActivity extends AppCompatActivity
         mNameView.setText(data.name);
         mRatingView.setRating(data.rating);
         mAddressView.setText(data.address);
-        mPhoneView.setText(data.phone);
-        mWebSiteView.setText(data.website);
-        mPriceView.setText(data.priceLevel + "");
+        mPhoneView.setText("Phone: " + data.phone);
+        mWebSiteView.setText("Website: " + data.website);
+        mPriceView.setText(data.priceLevel, new Object());
     }
 
     @Override

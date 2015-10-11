@@ -56,7 +56,7 @@ public class PlaceTypeIconPicker {
                 id = R.drawable.restaurant_icon;
                 break;
             case Place.TYPE_ESTABLISHMENT:
-                id = R.drawable.government_icon;
+                id = R.drawable.worship_general_icon;
                 break;
             case Place.TYPE_BUS_STATION:
                 id = R.drawable.car_dealer_icon;

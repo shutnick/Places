@@ -16,7 +16,9 @@
                 android:id="@+id/place_details_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="El Mate"/>
+                android:layout_margin="6dp"
+                android:text="El Mate"
+                android:textSize="23sp"/>
 
             <com.example.moreno.places.components.details.list.ImagesListView
                 android:id="@+id/place_details_types"
@@ -35,25 +37,46 @@
                 android:id="@+id/place_details_address"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="daleko"/>
+                android:text="daleko"
+                android:textSize="17sp"/>
 
             <TextView
                 android:id="@+id/place_details_phone_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="102"/>
+                android:text="102"
+                android:textSize="17sp"/>
 
             <TextView
                 android:id="@+id/place_details_website"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="http://abc.xyz"/>
+                android:text="http://abc.xyz"
+                android:textSize="17sp"/>
 
-            <TextView
-                android:id="@+id/place_details_price"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="mmedium"/>
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="5dp"
+                    android:textSize="17sp"
+                    android:text="Prices: "/>
+                <com.example.moreno.places.components.details.PriceLevelTextView
+                    android:id="@+id/place_details_price"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="medium"
+                    android:textSize="20sp"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Photos: "
+                android:textSize="17sp"/>
 
             <com.example.moreno.places.components.details.list.ImagesListView
                 android:id="@+id/place_details_photos"

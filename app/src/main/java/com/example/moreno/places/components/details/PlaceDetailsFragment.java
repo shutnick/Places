@@ -75,8 +75,8 @@ public class PlaceDetailsFragment extends Fragment {
         Log.i(LOG_TAG, "Request photos");
         mPhotos.clear();
         mAllPhotosLoaded = false;
-//        final PendingResult<PlacePhotoMetadataResult> photosResult = Places.GeoDataApi.getPlacePhotos(mApiClient, "ChIJN1t_tDeuEmsRUsoyG83frY4");
-        final PendingResult<PlacePhotoMetadataResult> photosResult = Places.GeoDataApi.getPlacePhotos(mApiClient, placeId);
+        final PendingResult<PlacePhotoMetadataResult> photosResult = Places.GeoDataApi.getPlacePhotos(mApiClient, "ChIJN1t_tDeuEmsRUsoyG83frY4");
+//        final PendingResult<PlacePhotoMetadataResult> photosResult = Places.GeoDataApi.getPlacePhotos(mApiClient, placeId);
         ResultCallback<PlacePhotoMetadataResult> callback = new ResultCallback<PlacePhotoMetadataResult>() {
             @Override
             public void onResult(PlacePhotoMetadataResult placePhotoMetadataResult) {
