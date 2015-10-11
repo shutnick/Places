@@ -11,6 +11,7 @@ import com.example.moreno.places.R;
  * Created on 10.10.2015.
  */
 public class PlaceViewHolder extends RecyclerView.ViewHolder{
+    public final View root;
     public final ImageView icon;
     public final TextView distance;
     public final TextView name;
@@ -18,6 +19,7 @@ public class PlaceViewHolder extends RecyclerView.ViewHolder{
 
     public PlaceViewHolder(View itemView) {
         super(itemView);
+        root = itemView;
         icon = (ImageView) itemView.findViewById(R.id.place_icon);
         distance = (TextView) itemView.findViewById(R.id.place_distance);
         name = (TextView) itemView.findViewById(R.id.place_name);

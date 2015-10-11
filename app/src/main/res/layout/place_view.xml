@@ -2,14 +2,17 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp">
+    android:paddingLeft="5dp"
+    android:paddingBottom="5dp">
 
     <ImageView
         android:id="@+id/place_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/place_icon_width"
+        android:layout_height="@dimen/place_icon_width"
         android:layout_alignParentLeft="true"
-        android:src="@drawable/ic_action_search"/>
+        android:layout_alignParentTop="true"
+        android:src="@drawable/ic_action_search"
+        android:scaleType="fitCenter"/>
 
     <TextView
         android:id="@+id/place_distance"

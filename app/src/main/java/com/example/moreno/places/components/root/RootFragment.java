@@ -2,6 +2,7 @@ package com.example.moreno.places.components.root;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -9,13 +10,16 @@ import com.example.moreno.places.components.root.list.PlaceDataHolder;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.AutocompletePredictionBuffer;
 import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.PlaceFilter;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,19 +32,23 @@ public class RootFragment extends Fragment {
     public static final String TAG = "root fragment";
     public static final String LOG_TAG = "RootFragment";
     private GoogleApiClient mApiClient;
-    private Activity mActivity;
     private List<PlaceDataHolder> mPlacesList = new ArrayList<>();
+    private Location mUserLocation;
+    private boolean mNearLocationRequested;
+    private boolean mQueryLocationRequested;
+    private String mRequest;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        mActivity = getActivity();
-        mApiClient = new GoogleApiClient.Builder(mActivity)
+        final Activity activity = getActivity();
+        mApiClient = new GoogleApiClient.Builder(activity)
                 .addApi(Places.GEO_DATA_API)
                 .addApi(Places.PLACE_DETECTION_API)
-                .addConnectionCallbacks((GoogleApiClient.ConnectionCallbacks) mActivity)
-                .addOnConnectionFailedListener((GoogleApiClient.OnConnectionFailedListener) mActivity)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks((GoogleApiClient.ConnectionCallbacks) activity)
+                .addOnConnectionFailedListener((GoogleApiClient.OnConnectionFailedListener) activity)
                 .build();
     }
 
@@ -48,7 +56,6 @@ public class RootFragment extends Fragment {
     public void onStart() {
         super.onStart();
         mApiClient.connect();
-        ((OnDataReceivedListener) mActivity).onDataReceived(mPlacesList);
     }
 
     @Override
@@ -58,55 +65,95 @@ public class RootFragment extends Fragment {
     }
 
     public void getNearLocations() {
+        mNearLocationRequested = true;
         Log.i(LOG_TAG, "Define near places");
-        PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mApiClient, new PlaceFilter());
+        final PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mApiClient, new PlaceFilter());
         result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
             @Override
             public void onResult(PlaceLikelihoodBuffer placeLikelihoods) {
                 boolean resultSuccess = placeLikelihoods.getStatus().isSuccess();
-                Log.i(LOG_TAG,  "Near places result success: " + resultSuccess);
+                Log.i(LOG_TAG, "Near places result success: " + resultSuccess);
                 if (resultSuccess) {
                     mPlacesList.clear();
                     for (PlaceLikelihood placeLikelihood : placeLikelihoods) {
                         final Place place = placeLikelihood.getPlace();
-                        Log.d(LOG_TAG, "Near place: " + place.toString());
-                        PlaceDataHolder.Builder builder = new PlaceDataHolder.Builder()
-                                .url("default")
-                                .name(place.getName())
-                                .address(place.getAddress())
-                                .distance("default");
-                        mPlacesList.add(builder.build());
+                        addPlaceData(place);
                     }
-                    ((OnDataReceivedListener) mActivity).onDataReceived(mPlacesList);
+                    ((OnDataReceivedListener) getActivity()).onDataReceived(mPlacesList);
                 }
-
+                mNearLocationRequested = false;
+                placeLikelihoods.release();
             }
         });
     }
 
     public void getRequestedLocations(String query) {
+        mQueryLocationRequested = true;
+        mRequest = query;
         Log.i(LOG_TAG, "Define query places");
-        PendingResult<AutocompletePredictionBuffer> predictions = Places.GeoDataApi.getAutocompletePredictions(mApiClient, query, null, null);
+        final PendingResult<AutocompletePredictionBuffer> predictions = Places.GeoDataApi.getAutocompletePredictions(mApiClient, query, null, null);
         predictions.setResultCallback(new ResultCallback<AutocompletePredictionBuffer>() {
             @Override
             public void onResult(AutocompletePredictionBuffer autocompletePredictions) {
                 boolean resultSuccess = autocompletePredictions.getStatus().isSuccess();
-                Log.i(LOG_TAG,  "Requested places result success: " + resultSuccess);
+                Log.i(LOG_TAG, "Requested places result success: " + resultSuccess);
                 if (resultSuccess) {
                     mPlacesList.clear();
+
+                    List<String> placesIdList = new ArrayList<>();
                     for (AutocompletePrediction prediction : autocompletePredictions) {
                         Log.d(LOG_TAG, "Place: " + prediction.toString());
-                        PlaceDataHolder.Builder builder = new PlaceDataHolder.Builder()
-                                .url("default")
-                                .name(prediction.getDescription())
-                                .address("default")
-                                .distance("default");
-                        mPlacesList.add(builder.build());
+                        placesIdList.add(prediction.getPlaceId());
                     }
-                    ((OnDataReceivedListener) mActivity).onDataReceived(mPlacesList);
+                    String[] placesIdArray = new String[placesIdList.size()];
+                    PendingResult<PlaceBuffer> place = Places.GeoDataApi.getPlaceById(mApiClient, placesIdList.toArray(placesIdArray));
+                    ResultCallback<PlaceBuffer> callback = new ResultCallback<PlaceBuffer>() {
+                        @Override
+                        public void onResult(PlaceBuffer places) {
+                            for (Place place : places) {
+                                addPlaceData(place);
+                            }
+                            ((OnDataReceivedListener) getActivity()).onDataReceived(mPlacesList);
+                        }
+                    };
+                    place.setResultCallback(callback);
                 }
+                mQueryLocationRequested = false;
+                mRequest = null;
+                autocompletePredictions.release();
             }
         });
+    }
+
+    private void addPlaceData(Place place) {
+        final List<Integer> placeTypes = place.getPlaceTypes();
+        final LatLng latLng = place.getLatLng();
+        Location placeLocation = new Location("Place location");
+        placeLocation.setLatitude(latLng.latitude);
+        placeLocation.setLongitude(latLng.longitude);
+        PlaceDataHolder.Builder builder = new PlaceDataHolder.Builder()
+                .placeId(place.getId())
+                .placeType(placeTypes.isEmpty() ? 0 : placeTypes.get(0))
+                .name(place.getName())
+                .address(place.getAddress())
+                .distance(mUserLocation.distanceTo(placeLocation));
+
+        Log.d(LOG_TAG, placeTypes.toString());
+        mPlacesList.add(builder.build());
+    }
+
+    public void getUserLocation() {
+        mUserLocation = LocationServices.FusedLocationApi.getLastLocation(mApiClient);
+    }
+
+    public void updatePlaceList() {
+        if (mNearLocationRequested) {
+            getNearLocations();
+        } else if (mQueryLocationRequested && mRequest != null) {
+            getRequestedLocations(mRequest);
+        } else if (!mPlacesList.isEmpty()) {
+            ((OnDataReceivedListener) getActivity()).onDataReceived(mPlacesList);
+        }
     }
 
     public interface OnDataReceivedListener {

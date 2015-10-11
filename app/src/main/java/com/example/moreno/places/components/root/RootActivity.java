@@ -15,6 +15,7 @@ import android.view.View;
 
 import com.example.moreno.places.R;
 import com.example.moreno.places.components.details.PlaceDetailsActivity;
+import com.example.moreno.places.components.details.PlaceDetailsFragment;
 import com.example.moreno.places.components.root.list.PlaceDataHolder;
 import com.example.moreno.places.components.root.list.PlacesListAdapter;
 import com.example.moreno.places.components.root.list.PlacesListView;
@@ -26,9 +27,12 @@ import java.util.List;
 /**
  * Created on 09.10.2015.
  */
-public class RootActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, RootFragment.OnDataReceivedListener {
+public class RootActivity extends AppCompatActivity
+        implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        RootFragment.OnDataReceivedListener {
 
-    public static final String LOG_TAG = "RootActivity";
+    private static final String LOG_TAG = "RootActivity";
     private RootFragment mFragment;
     private PlacesListAdapter mPlacesListAdapter;
 
@@ -36,6 +40,18 @@ public class RootActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.root_layout);
+        prepareRootFragment();
+        preparePlaceListView();
+    }
+
+    private void preparePlaceListView() {
+        PlacesListView placesListView = (PlacesListView) findViewById(R.id.places_list);
+        placesListView.setLayoutManager(this);
+        mPlacesListAdapter = new PlacesListAdapter(this);
+        placesListView.setAdapter(mPlacesListAdapter);
+    }
+
+    private void prepareRootFragment() {
         FragmentManager supportFragmentManager = getFragmentManager();
         mFragment = (RootFragment) supportFragmentManager.findFragmentByTag(RootFragment.TAG);
         if (mFragment == null) {
@@ -44,14 +60,11 @@ public class RootActivity extends AppCompatActivity implements GoogleApiClient.C
             transaction.add(mFragment, RootFragment.TAG);
             transaction.commit();
         }
-        PlacesListView placesListView = (PlacesListView) findViewById(R.id.places_list);
-        placesListView.setLayoutManager(this);
-        mPlacesListAdapter = new PlacesListAdapter();
-        placesListView.setAdapter(mPlacesListAdapter);
     }
 
-    private void openPlaceDetails() {
+    public void openPlaceDetails(String placeId) {
         Intent detailsIntent = new Intent(this, PlaceDetailsActivity.class);
+        detailsIntent.putExtra(PlaceDetailsFragment.PLACE_ID_KEY, placeId);
         startActivity(detailsIntent);
     }
 
@@ -81,6 +94,8 @@ public class RootActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onConnected(Bundle bundle) {
         Log.d(LOG_TAG, "Api client connected");
+        mFragment.getUserLocation();
+        mFragment.updatePlaceList();
     }
 
     @Override
