@@ -3,6 +3,7 @@ package com.example.moreno.places.components.root.list;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.AttributeSet;
@@ -32,9 +33,9 @@ public class PlacesListView extends RecyclerView {
         final int deviceOrientation = context.getResources().getConfiguration().orientation;
         LayoutManager layoutManager;
         if (deviceOrientation == Configuration.ORIENTATION_PORTRAIT) {
-            layoutManager = new LinearLayoutManager(context, Configuration.ORIENTATION_PORTRAIT, false);
+            layoutManager = new LinearLayoutManager(context, OrientationHelper.VERTICAL, false);
         } else {
-            layoutManager = new StaggeredGridLayoutManager(2, Configuration.ORIENTATION_PORTRAIT);
+            layoutManager = new StaggeredGridLayoutManager(2, OrientationHelper.VERTICAL);
         }
         setLayoutManager(layoutManager);
     }
