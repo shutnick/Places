@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -14,8 +13,6 @@ import com.example.moreno.places.R;
 import com.example.moreno.places.components.details.list.ImagesListView;
 import com.example.moreno.places.components.details.list.PhotosListAdapter;
 import com.example.moreno.places.components.details.list.TypesListAdapter;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.List;
 
@@ -23,8 +20,7 @@ import java.util.List;
  * Created on 09.10.2015.
  */
 public class PlaceDetailsActivity extends AppCompatActivity
-        implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
+        implements
         PlaceDetailsFragment.OnDetailsReceivedListener{
 
     private static final String LOG_TAG = "PlaceDetailsActivity";
@@ -62,31 +58,16 @@ public class PlaceDetailsActivity extends AppCompatActivity
     }
 
     private void prepareFragment() {
-        FragmentManager supportFragmentManager = getFragmentManager();
-        mFragment = (PlaceDetailsFragment) supportFragmentManager.findFragmentByTag(PlaceDetailsFragment.TAG);
+        FragmentManager fragmentManager = getFragmentManager();
+        mFragment = (PlaceDetailsFragment) fragmentManager.findFragmentByTag(PlaceDetailsFragment.TAG);
         if (mFragment == null) {
             mFragment = new PlaceDetailsFragment();
-            FragmentTransaction transaction = supportFragmentManager.beginTransaction();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
             transaction.add(mFragment, PlaceDetailsFragment.TAG);
             transaction.commit();
         }
     }
 
-    @Override
-    public void onConnected(Bundle bundle) {
-        Log.d(LOG_TAG, "Api client connected");
-        mFragment.getPlaceDetails();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.d(LOG_TAG, "Api client suspended");
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.d(LOG_TAG, "Api client failed");
-    }
 
     @Override
     public void onPlaceReceived(PlaceDetailsHolder data) {

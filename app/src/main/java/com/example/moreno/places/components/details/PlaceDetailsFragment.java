@@ -1,12 +1,12 @@
 package com.example.moreno.places.components.details;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.example.moreno.places.R;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
@@ -23,7 +23,8 @@ import java.util.List;
 /**
  * Created on 09.10.2015.
  */
-public class PlaceDetailsFragment extends Fragment {
+public class PlaceDetailsFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
     public static final String TAG = "place details fragment";
     public static final String PLACE_ID_KEY = "place id";
     private static final String LOG_TAG = "PlaceDetailsFragment";
@@ -36,11 +37,10 @@ public class PlaceDetailsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        final Activity activity = getActivity();
-        mApiClient = new GoogleApiClient.Builder(activity)
+        mApiClient = new GoogleApiClient.Builder(getActivity().getApplicationContext())
                 .addApi(Places.GEO_DATA_API)
-                .addConnectionCallbacks((GoogleApiClient.ConnectionCallbacks) activity)
-                .addOnConnectionFailedListener((GoogleApiClient.OnConnectionFailedListener) activity)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
                 .build();
     }
 
@@ -61,13 +61,17 @@ public class PlaceDetailsFragment extends Fragment {
         if (mData == null) {
             getDetails(placeId);
         } else {
-            ((OnDetailsReceivedListener) getActivity()).onPlaceReceived(mData);
+            if (getActivity() instanceof OnDetailsReceivedListener) {
+                ((OnDetailsReceivedListener) getActivity()).onPlaceReceived(mData);
+            }
         }
 
         if (!mAllPhotosLoaded) {
             getPhotos(placeId);
         } else {
-            ((OnDetailsReceivedListener) getActivity()).onAllPhotosLoaded(mPhotos);
+            if (getActivity() instanceof OnDetailsReceivedListener) {
+                ((OnDetailsReceivedListener) getActivity()).onAllPhotosLoaded(mPhotos);
+            }
         }
     }
 
@@ -93,7 +97,9 @@ public class PlaceDetailsFragment extends Fragment {
                                 if (placePhotoResult.getStatus().isSuccess()) {
                                     final Bitmap photo = placePhotoResult.getBitmap();
                                     mPhotos.add(photo);
-                                    ((OnDetailsReceivedListener) getActivity()).onPhotoLoaded(photo);
+                                    if (getActivity() instanceof OnDetailsReceivedListener) {
+                                        ((OnDetailsReceivedListener) getActivity()).onPhotoLoaded(photo);
+                                    }
                                     Log.d(LOG_TAG, "Photo " + mPhotos.size() + " added");
                                     if (photoMetadata.getCount() == mPhotos.size()) {
                                         Log.d(LOG_TAG, "All photos loaded");
@@ -122,12 +128,31 @@ public class PlaceDetailsFragment extends Fragment {
                 if (requestSuccess){
                     mData = new PlaceDetailsHolder(places.get(0));
                 }
-                ((OnDetailsReceivedListener) getActivity()).onPlaceReceived(mData);
+                if (getActivity() instanceof OnDetailsReceivedListener) {
+                    ((OnDetailsReceivedListener) getActivity()).onPlaceReceived(mData);
+                }
                 places.release();
             }
         };
         placeResult.setResultCallback(callback);
     }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        Log.d(LOG_TAG, "Api client connected");
+        getPlaceDetails();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.d(LOG_TAG, "Api client suspended");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.d(LOG_TAG, "Api client failed");
+    }
+
 
     public interface OnDetailsReceivedListener {
         void onPlaceReceived(PlaceDetailsHolder data);

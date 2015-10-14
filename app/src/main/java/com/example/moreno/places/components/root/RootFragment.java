@@ -1,12 +1,13 @@
 package com.example.moreno.places.components.root;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.example.moreno.places.components.details.PlaceDetailsFragment;
 import com.example.moreno.places.components.root.list.PlaceDataHolder;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
@@ -27,7 +28,8 @@ import java.util.List;
 /**
  * Created on 09.10.2015.
  */
-public class RootFragment extends Fragment {
+public class RootFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
     public static final String TAG = "root fragment";
     public static final String LOG_TAG = "RootFragment";
@@ -42,13 +44,12 @@ public class RootFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        final Activity activity = getActivity();
-        mApiClient = new GoogleApiClient.Builder(activity)
+        mApiClient = new GoogleApiClient.Builder(getActivity().getApplicationContext())
                 .addApi(Places.GEO_DATA_API)
                 .addApi(Places.PLACE_DETECTION_API)
                 .addApi(LocationServices.API)
-                .addConnectionCallbacks((GoogleApiClient.ConnectionCallbacks) activity)
-                .addOnConnectionFailedListener((GoogleApiClient.OnConnectionFailedListener) activity)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
                 .build();
     }
 
@@ -79,7 +80,9 @@ public class RootFragment extends Fragment {
                         final Place place = placeLikelihood.getPlace();
                         addPlaceData(place);
                     }
-                    ((OnDataReceivedListener) getActivity()).onDataReceived(mPlacesList);
+                    if (getActivity() instanceof PlaceDetailsFragment.OnDetailsReceivedListener) {
+                        ((OnDataReceivedListener) getActivity()).onDataReceived(mPlacesList);
+                    }
                 }
                 mNearLocationRequested = false;
                 placeLikelihoods.release();
@@ -113,7 +116,10 @@ public class RootFragment extends Fragment {
                             for (Place place : places) {
                                 addPlaceData(place);
                             }
-                            ((OnDataReceivedListener) getActivity()).onDataReceived(mPlacesList);
+
+                            if (getActivity() instanceof PlaceDetailsFragment.OnDetailsReceivedListener) {
+                                ((OnDataReceivedListener) getActivity()).onDataReceived(mPlacesList);
+                            }
                         }
                     };
                     place.setResultCallback(callback);
@@ -151,8 +157,28 @@ public class RootFragment extends Fragment {
         } else if (mQueryLocationRequested && mRequest != null) {
             getRequestedLocations(mRequest);
         } else if (!mPlacesList.isEmpty()) {
-            ((OnDataReceivedListener) getActivity()).onDataReceived(mPlacesList);
+            if (getActivity() instanceof PlaceDetailsFragment.OnDetailsReceivedListener) {
+                ((OnDataReceivedListener) getActivity()).onDataReceived(mPlacesList);
+            }
+
         }
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        Log.d(LOG_TAG, "Api client connected");
+        getUserLocation();
+        updatePlaceList();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.d(LOG_TAG, "Api client suspended");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.d(LOG_TAG, "Api client failed");
     }
 
     public interface OnDataReceivedListener {

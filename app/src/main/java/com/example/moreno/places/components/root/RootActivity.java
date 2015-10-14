@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -19,8 +18,6 @@ import com.example.moreno.places.components.details.PlaceDetailsFragment;
 import com.example.moreno.places.components.root.list.PlaceDataHolder;
 import com.example.moreno.places.components.root.list.PlacesListAdapter;
 import com.example.moreno.places.components.root.list.PlacesListView;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.List;
 
@@ -28,9 +25,7 @@ import java.util.List;
  * Created on 09.10.2015.
  */
 public class RootActivity extends AppCompatActivity
-        implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        RootFragment.OnDataReceivedListener {
+        implements RootFragment.OnDataReceivedListener {
 
     private static final String LOG_TAG = "RootActivity";
     private RootFragment mFragment;
@@ -52,11 +47,11 @@ public class RootActivity extends AppCompatActivity
     }
 
     private void prepareRootFragment() {
-        FragmentManager supportFragmentManager = getFragmentManager();
-        mFragment = (RootFragment) supportFragmentManager.findFragmentByTag(RootFragment.TAG);
+        FragmentManager fragmentManager = getFragmentManager();
+        mFragment = (RootFragment) fragmentManager.findFragmentByTag(RootFragment.TAG);
         if (mFragment == null) {
             mFragment = new RootFragment();
-            FragmentTransaction transaction = supportFragmentManager.beginTransaction();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
             transaction.add(mFragment, RootFragment.TAG);
             transaction.commit();
         }
@@ -89,23 +84,6 @@ public class RootActivity extends AppCompatActivity
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        Log.d(LOG_TAG, "Api client connected");
-        mFragment.getUserLocation();
-        mFragment.updatePlaceList();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.d(LOG_TAG, "Api client suspended");
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.d(LOG_TAG, "Api client failed");
     }
 
     @Override
