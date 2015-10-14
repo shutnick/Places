@@ -1,12 +1,22 @@
 package com.example.moreno.places.components.root;
 
 import android.app.Fragment;
+import android.content.Context;
+import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.moreno.places.components.details.PlaceDetailsFragment;
 import com.example.moreno.places.components.root.list.PlaceDataHolder;
+import com.example.moreno.places.network.RequestHandler;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -16,11 +26,12 @@ import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.AutocompletePredictionBuffer;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
-import com.google.android.gms.location.places.PlaceFilter;
-import com.google.android.gms.location.places.PlaceLikelihood;
-import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,9 +77,65 @@ public class RootFragment extends Fragment implements GoogleApiClient.Connection
     }
 
     public void getNearLocations() {
+        if (mUserLocation == null) {
+            //TODO show warning that location didn't find yet
+            return;
+        }
         mNearLocationRequested = true;
         Log.i(LOG_TAG, "Define near places");
-        final PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mApiClient, new PlaceFilter());
+        //TODO Google recommends to use Android Places API or Places Library of the Google Maps Javascript API rather than Google Places API Web Service
+        //Google Places API Web Service recommended for web based applications.
+        final String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?" +
+                "key=AIzaSyCvrXZgAyUziaCAbt7zg9eQovlG2nRa8wk&" +
+                "location=" + mUserLocation.getLatitude() + "," + mUserLocation.getLongitude() + "&" +
+                "radius=500&" +
+                "rankby=prominence";
+        final Response.Listener<JSONObject> successListener = new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    JSONArray jsonPlaces = response.getJSONArray("results");
+                    int arraySize = jsonPlaces.length();
+                    for (int i = 0; i < arraySize; i++) {
+                        JSONObject jPlace = jsonPlaces.getJSONObject(i);
+
+                        JSONObject jPlaceLocation = jPlace.getJSONObject("geometry").getJSONObject("location");
+                        Location placeLocation = new Location("Place location");
+                        placeLocation.setLongitude(jPlaceLocation.getDouble("lng"));
+                        placeLocation.setLatitude(jPlaceLocation.getDouble("lat"));
+
+                        String placeType = jPlace.getJSONArray("types").getString(0);
+                        PlaceDataHolder data = new PlaceDataHolder.Builder()
+                                .placeId(jPlace.getString("place_id"))
+                                //TODO save String place type
+                                .placeType(0)
+                                .address(jPlace.getString("vicinity"))
+                                .name(jPlace.getString("name"))
+                                .distance(mUserLocation.distanceTo(placeLocation))
+                                .build();
+                        mPlacesList.add(data);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                if (getActivity() instanceof OnDataReceivedListener) {
+                    ((OnDataReceivedListener) getActivity()).onDataReceived(mPlacesList);
+                }
+                Log.d(LOG_TAG, response.toString());
+                mNearLocationRequested = false;
+            }
+        };
+        final Response.ErrorListener errorListener = new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(LOG_TAG, "Error");
+            }
+        };
+        RequestHandler.getInstance(getActivity().getApplicationContext()).getRequestQueue().
+                add(new JsonObjectRequest(Request.Method.GET, url, null, successListener, errorListener));
+
+
+/*        final PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mApiClient, new PlaceFilter());
         result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
             @Override
             public void onResult(PlaceLikelihoodBuffer placeLikelihoods) {
@@ -87,7 +154,7 @@ public class RootFragment extends Fragment implements GoogleApiClient.Connection
                 mNearLocationRequested = false;
                 placeLikelihoods.release();
             }
-        });
+        });*/
     }
 
     public void getRequestedLocations(String query) {
@@ -116,10 +183,7 @@ public class RootFragment extends Fragment implements GoogleApiClient.Connection
                             for (Place place : places) {
                                 addPlaceData(place);
                             }
-
-                            if (getActivity() instanceof PlaceDetailsFragment.OnDetailsReceivedListener) {
-                                ((OnDataReceivedListener) getActivity()).onDataReceived(mPlacesList);
-                            }
+                            ((OnDataReceivedListener) getActivity()).onDataReceived(mPlacesList);
                         }
                     };
                     place.setResultCallback(callback);
@@ -148,7 +212,33 @@ public class RootFragment extends Fragment implements GoogleApiClient.Connection
     }
 
     public void getUserLocation() {
-        mUserLocation = LocationServices.FusedLocationApi.getLastLocation(mApiClient);
+        LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        Criteria locationCriteria = new Criteria();
+        locationCriteria.setAccuracy(Criteria.ACCURACY_FINE);
+        locationManager.requestSingleUpdate(locationCriteria, new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                mUserLocation = location;
+                Log.d(LOG_TAG, "Current location: " + mUserLocation.toString());
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        }, null);
+
+//        mUserLocation = LocationServices.FusedLocationApi.getLastLocation(mApiClient);
     }
 
     public void updatePlaceList() {
@@ -157,10 +247,7 @@ public class RootFragment extends Fragment implements GoogleApiClient.Connection
         } else if (mQueryLocationRequested && mRequest != null) {
             getRequestedLocations(mRequest);
         } else if (!mPlacesList.isEmpty()) {
-            if (getActivity() instanceof PlaceDetailsFragment.OnDetailsReceivedListener) {
-                ((OnDataReceivedListener) getActivity()).onDataReceived(mPlacesList);
-            }
-
+            ((OnDataReceivedListener) getActivity()).onDataReceived(mPlacesList);
         }
     }
 

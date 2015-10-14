@@ -70,4 +70,14 @@ public class PlaceTypeIconPicker {
         }
         return id;
     }
+
+    public static int getIconId(String placeType) {
+        int resId;
+        switch (placeType) {
+            default:
+                resId = R.drawable.generic_recreational_icon;
+                break;
+        }
+        return resId;
+    }
 }
