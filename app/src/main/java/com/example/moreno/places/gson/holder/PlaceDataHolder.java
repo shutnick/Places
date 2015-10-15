@@ -1,4 +1,4 @@
-package com.example.moreno.places.components.root.list;
+package com.example.moreno.places.gson.holder;
 
 /**
  * Created on 10.10.2015.
@@ -7,7 +7,12 @@ public class PlaceDataHolder {
     public final String placeId;
     public final String iconUrl;
     public final CharSequence name;
+    /**
+     * Use placeLocation instead;
+     */
+    @Deprecated
     public final float distance;
+    public final PlaceLocationHolder placeLocation;
     public final CharSequence address;
 
     private PlaceDataHolder(Builder builder) {
@@ -16,6 +21,7 @@ public class PlaceDataHolder {
         name = builder.name;
         address = builder.address;
         distance = builder.distance;
+        placeLocation = builder.placeLocation;
     }
 
     public static class Builder {
@@ -24,6 +30,7 @@ public class PlaceDataHolder {
         private CharSequence name;
         private float distance;
         private CharSequence address;
+        private PlaceLocationHolder placeLocation;
 
         public Builder placeId(String placeId) {
             this.placeId = placeId;
@@ -44,8 +51,13 @@ public class PlaceDataHolder {
             return this;
         }
 
-        public Builder placeType(String iconUrl) {
+        public Builder iconUrl(String iconUrl) {
             this.iconUrl = iconUrl;
+            return this;
+        }
+
+        public Builder location(PlaceLocationHolder data) {
+            placeLocation = data;
             return this;
         }
 

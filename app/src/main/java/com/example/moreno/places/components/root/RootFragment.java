@@ -9,14 +9,12 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.android.volley.Request;
+import com.android.volley.ParseError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.example.moreno.places.components.details.PlaceDetailsFragment;
-import com.example.moreno.places.components.root.list.PlaceDataHolder;
+import com.example.moreno.places.gson.holder.PlaceDataHolder;
+import com.example.moreno.places.network.GsonRequest;
 import com.example.moreno.places.network.RequestHandler;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -28,10 +26,6 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,77 +77,31 @@ public class RootFragment extends Fragment implements GoogleApiClient.Connection
         }
         mNearLocationRequested = true;
         Log.i(LOG_TAG, "Define near places");
-        //TODO Google recommends to use Android Places API or Places Library of the Google Maps Javascript API rather than Google Places API Web Service
-        //Google Places API Web Service recommended for web based applications.
+
         final String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?" +
                 "key=AIzaSyCvrXZgAyUziaCAbt7zg9eQovlG2nRa8wk&" +
                 "location=" + mUserLocation.getLatitude() + "," + mUserLocation.getLongitude() + "&" +
                 "radius=500&" +
                 "rankby=prominence";
-        final Response.Listener<JSONObject> successListener = new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    JSONArray jsonPlaces = response.getJSONArray("results");
-                    int arraySize = jsonPlaces.length();
-                    for (int i = 0; i < arraySize; i++) {
-                        JSONObject jPlace = jsonPlaces.getJSONObject(i);
 
-                        JSONObject jPlaceLocation = jPlace.getJSONObject("geometry").getJSONObject("location");
-                        Location placeLocation = new Location("Place location");
-                        placeLocation.setLongitude(jPlaceLocation.getDouble("lng"));
-                        placeLocation.setLatitude(jPlaceLocation.getDouble("lat"));
-
-                        PlaceDataHolder data = new PlaceDataHolder.Builder()
-                                .placeId(jPlace.getString("place_id"))
-                                .placeType(jPlace.getString("icon"))
-                                .address(jPlace.getString("vicinity"))
-                                .name(jPlace.getString("name"))
-                                .distance(mUserLocation.distanceTo(placeLocation))
-                                .build();
-                        mPlacesList.add(data);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                if (getActivity() instanceof OnDataReceivedListener) {
-                    ((OnDataReceivedListener) getActivity()).onDataReceived(mPlacesList);
-                }
-                Log.d(LOG_TAG, response.toString());
-                mNearLocationRequested = false;
-            }
-        };
         final Response.ErrorListener errorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(LOG_TAG, "Error: " + error.networkResponse.toString());
+                Log.d(LOG_TAG, "Error: " + new ParseError(error));
             }
         };
-        //TODO Implement custom Request to get list of places instead of JSON
-        RequestHandler.getInstance(getActivity().getApplicationContext()).getRequestQueue().
-                add(new JsonObjectRequest(Request.Method.GET, url, null, successListener, errorListener));
-
-
-/*        final PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mApiClient, new PlaceFilter());
-        result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
+        Response.Listener<com.example.moreno.places.gson.holder.Places> successListener = new Response.Listener<com.example.moreno.places.gson.holder.Places>() {
             @Override
-            public void onResult(PlaceLikelihoodBuffer placeLikelihoods) {
-                boolean resultSuccess = placeLikelihoods.getStatus().isSuccess();
-                Log.i(LOG_TAG, "Near places result success: " + resultSuccess);
-                if (resultSuccess) {
-                    mPlacesList.clear();
-                    for (PlaceLikelihood placeLikelihood : placeLikelihoods) {
-                        final Place place = placeLikelihood.getPlace();
-                        addPlaceData(place);
-                    }
-                    if (getActivity() instanceof PlaceDetailsFragment.OnDetailsReceivedListener) {
-                        ((OnDataReceivedListener) getActivity()).onDataReceived(mPlacesList);
-                    }
+            public void onResponse(com.example.moreno.places.gson.holder.Places response) {
+                mPlacesList.addAll(response.places());
+                if (getActivity() instanceof OnDataReceivedListener) {
+                    ((OnDataReceivedListener) getActivity()).onDataReceived(mPlacesList);
                 }
-                mNearLocationRequested = false;
-                placeLikelihoods.release();
             }
-        });*/
+        };
+
+        RequestHandler.getInstance(getActivity().getApplicationContext()).getRequestQueue().
+                add(new GsonRequest<>(url, com.example.moreno.places.gson.holder.Places.class, successListener, errorListener));
     }
 
     public void getRequestedLocations(String query) {
@@ -202,7 +150,7 @@ public class RootFragment extends Fragment implements GoogleApiClient.Connection
         placeLocation.setLongitude(latLng.longitude);
         PlaceDataHolder.Builder builder = new PlaceDataHolder.Builder()
                 .placeId(place.getId())
-//                .placeType(place.)
+//                .iconUrl(place.)
                 .name(place.getName())
                 .address(place.getAddress())
                 .distance(mUserLocation.distanceTo(placeLocation));

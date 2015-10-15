@@ -15,9 +15,9 @@ import android.view.View;
 import com.example.moreno.places.R;
 import com.example.moreno.places.components.details.PlaceDetailsActivity;
 import com.example.moreno.places.components.details.PlaceDetailsFragment;
-import com.example.moreno.places.components.root.list.PlaceDataHolder;
 import com.example.moreno.places.components.root.list.PlacesListAdapter;
 import com.example.moreno.places.components.root.list.PlacesListView;
+import com.example.moreno.places.gson.holder.PlaceDataHolder;
 
 import java.util.List;
 

@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import com.android.volley.toolbox.ImageLoader;
 import com.example.moreno.places.R;
 import com.example.moreno.places.components.root.RootActivity;
+import com.example.moreno.places.gson.holder.PlaceDataHolder;
 import com.example.moreno.places.network.RequestHandler;
 
 import java.util.ArrayList;
