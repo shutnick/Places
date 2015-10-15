@@ -6,7 +6,7 @@
     android:layout_marginBottom="5dp"
     android:background="#f5f5f5">
 
-    <ImageView
+    <com.android.volley.toolbox.NetworkImageView
         android:id="@+id/place_icon"
         android:layout_width="@dimen/place_icon_width"
         android:layout_height="@dimen/place_icon_width"

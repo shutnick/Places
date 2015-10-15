@@ -1,20 +1,18 @@
 package com.example.moreno.places.components.root.list;
 
-import com.example.moreno.places.util.PlaceTypeIconPicker;
-
 /**
  * Created on 10.10.2015.
  */
 public class PlaceDataHolder {
     public final String placeId;
-    public final int iconResId;
+    public final String iconUrl;
     public final CharSequence name;
     public final float distance;
     public final CharSequence address;
 
     private PlaceDataHolder(Builder builder) {
         placeId = builder.placeId;
-        iconResId = PlaceTypeIconPicker.getIconId(builder.placeType);
+        iconUrl = builder.iconUrl;
         name = builder.name;
         address = builder.address;
         distance = builder.distance;
@@ -22,7 +20,7 @@ public class PlaceDataHolder {
 
     public static class Builder {
         private String placeId;
-        private int placeType;
+        private String iconUrl;
         private CharSequence name;
         private float distance;
         private CharSequence address;
@@ -46,8 +44,8 @@ public class PlaceDataHolder {
             return this;
         }
 
-        public Builder placeType(int placeType) {
-            this.placeType = placeType;
+        public Builder placeType(String iconUrl) {
+            this.iconUrl = iconUrl;
             return this;
         }
 

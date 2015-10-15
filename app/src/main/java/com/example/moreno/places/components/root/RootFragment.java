@@ -104,11 +104,9 @@ public class RootFragment extends Fragment implements GoogleApiClient.Connection
                         placeLocation.setLongitude(jPlaceLocation.getDouble("lng"));
                         placeLocation.setLatitude(jPlaceLocation.getDouble("lat"));
 
-                        String placeType = jPlace.getJSONArray("types").getString(0);
                         PlaceDataHolder data = new PlaceDataHolder.Builder()
                                 .placeId(jPlace.getString("place_id"))
-                                //TODO save String place type
-                                .placeType(0)
+                                .placeType(jPlace.getString("icon"))
                                 .address(jPlace.getString("vicinity"))
                                 .name(jPlace.getString("name"))
                                 .distance(mUserLocation.distanceTo(placeLocation))
@@ -128,9 +126,10 @@ public class RootFragment extends Fragment implements GoogleApiClient.Connection
         final Response.ErrorListener errorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(LOG_TAG, "Error");
+                Log.d(LOG_TAG, "Error: " + error.networkResponse.toString());
             }
         };
+        //TODO Implement custom Request to get list of places instead of JSON
         RequestHandler.getInstance(getActivity().getApplicationContext()).getRequestQueue().
                 add(new JsonObjectRequest(Request.Method.GET, url, null, successListener, errorListener));
 
@@ -203,7 +202,7 @@ public class RootFragment extends Fragment implements GoogleApiClient.Connection
         placeLocation.setLongitude(latLng.longitude);
         PlaceDataHolder.Builder builder = new PlaceDataHolder.Builder()
                 .placeId(place.getId())
-                .placeType(placeTypes.isEmpty() ? 0 : placeTypes.get(0))
+//                .placeType(place.)
                 .name(place.getName())
                 .address(place.getAddress())
                 .distance(mUserLocation.distanceTo(placeLocation));

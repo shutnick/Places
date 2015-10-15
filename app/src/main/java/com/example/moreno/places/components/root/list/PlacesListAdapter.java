@@ -5,8 +5,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.volley.toolbox.ImageLoader;
 import com.example.moreno.places.R;
 import com.example.moreno.places.components.root.RootActivity;
+import com.example.moreno.places.network.RequestHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +33,7 @@ public class PlacesListAdapter extends RecyclerView.Adapter<PlaceViewHolder> {
     @Override
     public void onBindViewHolder(PlaceViewHolder holder, int position) {
         final PlaceDataHolder data = mPlacesList.get(position);
+        final ImageLoader imageLoader = RequestHandler.getInstance(holder.root.getContext().getApplicationContext()).getImageLoader();
         holder.root.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -40,7 +43,7 @@ public class PlacesListAdapter extends RecyclerView.Adapter<PlaceViewHolder> {
         holder.address.setText(data.address);
         holder.distance.setText((int)data.distance + " m");
         holder.name.setText(data.name);
-        holder.icon.setImageResource(data.iconResId);
+        holder.icon.setImageUrl(data.iconUrl, imageLoader);
     }
 
 
